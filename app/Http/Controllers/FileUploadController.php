@@ -17,11 +17,14 @@ class FileUploadController extends Controller
      */
     public function process(Request $obRequest)
     {
-
         $obFile = $obRequest->file("file");
 
         if (!$obFile || !$obFile->isValid()) {
             return $this->uploadError();
+        }
+
+        if (filesize($obFile) > config("tasks.max_file_size")) {
+            return $this->fileSizeError();
         }
 
         // У файла с JSON-данными необязательно должно быть расширение .json,
@@ -67,6 +70,20 @@ class FileUploadController extends Controller
     }
 
     /**
+     * Возвратить представление при превышении максимального размера файла.
+     * @return View Представление с сообщением об ошибке.
+     */
+    private function fileSizeError()
+    {
+        return view("results")->with(
+            [
+                "bHasError" => true,
+                "sResultMessage" => __("task1.file_size_exceed")
+            ]
+        );
+    }
+
+    /**
      * Обработать поступившие JSON-данные.
      * @param  array/object $obJSONData JSON-данные.
      * @return View                     Представление с сообщением о результате обработки.
@@ -96,7 +113,7 @@ class FileUploadController extends Controller
         // Для определения, надо ли понижать качество изображения, временно сохраняем
         // его с необходимым уровнем сжатия, а затем проверяем, уменьшился ли размер файла.
         $nInitialFilesize = $obImage->filesize();
-        $obImage->save("upload/$sFileName.jpg", config("image.max_jpg_quality"));
+        $obImage->save("upload/$sFileName.jpg", config("tasks.max_jpg_quality"));
         $nCompressedFilesize = $obImage->filesize();
 
         if ($nCompressedFilesize <= $nInitialFilesize) {
@@ -131,7 +148,7 @@ class FileUploadController extends Controller
         $obImage = Image::make($obFile);
 
         // Конвертируем файл в JPG с заданным качеством и сохраняем его.
-        $obImage = $obImage->encode("jpg", config("image.max_jpg_quality"));
+        $obImage = $obImage->encode("jpg", config("tasks.max_jpg_quality"));
         Storage::disk("local")->put("images/$sFileName.jpg", $obImage);
 
         return view("results")->with(

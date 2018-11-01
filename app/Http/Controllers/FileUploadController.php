@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 use Intervention\Image\Facades\Image;
 
@@ -21,10 +21,6 @@ class FileUploadController extends Controller
 
         if (!$obFile || !$obFile->isValid()) {
             return $this->uploadError("task1.invalid_file");
-        }
-
-        if (filesize($obFile) > config("tasks.max_file_size")) {
-            return $this->uploadError("task1.file_size_exceed");
         }
 
         // У файла с JSON-данными необязательно должно быть расширение .json,
@@ -163,13 +159,21 @@ class FileUploadController extends Controller
     /**
      * Сформировать имя локального файла, который нужно сохранить.
      * @param  UploadedFile $obFile Файл, полученный сервером.
-     * @return string               Название локального файла для сохранения.
+     * @return string               Название локального файла для сохранения (без расширения).
      */
     private function makeLocalFileName(UploadedFile $obFile)
     {
-        $sFileName = date("Y-m-d-H-i-s-");
-        $sFileName .= pathinfo($obFile->getClientOriginalName(), PATHINFO_FILENAME);
+        $sFileNamePrefix = date("Y-m-d-H-i-s");
+        $sFileName = $obFile->getClientOriginalName();
 
-        return $sFileName;
+        // pathinfo() можно использовать только при установке соответствующей локали
+        // (если имя файла содержит нелатинские символы). Мы не можем быть уверены, установлена
+        // ли на сервере соответствуюдщая локаль, поэтому применим другой метод.
+        $sDotIndex = strrpos($sFileName, ".");
+        if ($sDotIndex !== false && $sDotIndex > 0) {
+            $sFileName = substr($sFileName, 0, $sDotIndex);
+        }
+
+        return "$sFileNamePrefix-$sFileName";
     }
 }

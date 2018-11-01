@@ -9,9 +9,18 @@ return [
     'max_jpg_quality' => 70,
 
     /**
-     *  Максимальный размер файла при загрузке.
+     *  Максимальный размер приложенного файла при отправлении заявки.
      */
 
-    'max_file_size' => 4 * 1024 * 1024,
+    'max_attachment_size' => 3 * 1024 * 1024,
+
+    /**
+     * Допустимые типы файла, прилагаемого к заявке во втором задании.
+     */
+
+    'allowed_doc_types' => [
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ],
 
 ];

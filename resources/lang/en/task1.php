@@ -10,7 +10,6 @@ return [
 
     "process_results" => "Результат обработки",
     "invalid_file" => "Файл не был корректно загружен.",
-    "file_size_exceed" => "Файл слишком большой.",
     "file_processed" => "Файл успешно обработан.",
     "file_saved_as" => "Файл был сохранён как storage/app/images/:filename.jpg.",
     "file_converted_as" => "Файл был сконвертирован и сохранён как storage/app/images/:filename.jpg.",

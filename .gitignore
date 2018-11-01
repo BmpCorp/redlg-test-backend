@@ -16,3 +16,4 @@ yarn-error.log
 /upload
 /public/upload
 /storage/app/images
+/storage/app/documents

@@ -20,11 +20,11 @@ class FileUploadController extends Controller
         $obFile = $obRequest->file("file");
 
         if (!$obFile || !$obFile->isValid()) {
-            return $this->uploadError();
+            return $this->uploadError("task1.invalid_file");
         }
 
         if (filesize($obFile) > config("tasks.max_file_size")) {
-            return $this->fileSizeError();
+            return $this->uploadError("task1.file_size_exceed");
         }
 
         // У файла с JSON-данными необязательно должно быть расширение .json,
@@ -57,28 +57,15 @@ class FileUploadController extends Controller
 
     /**
      * Возвратить представление при ошибке загрузки.
+     * @param string $sErrorMessage Строка, определяющая сообщение об ошибке.
      * @return View Представление с сообщением об ошибке.
      */
-    private function uploadError()
+    private function uploadError($sErrorMessage)
     {
         return view("results")->with(
             [
                 "bHasError" => true,
-                "sResultMessage" => __("task1.upload_error")
-            ]
-        );
-    }
-
-    /**
-     * Возвратить представление при превышении максимального размера файла.
-     * @return View Представление с сообщением об ошибке.
-     */
-    private function fileSizeError()
-    {
-        return view("results")->with(
-            [
-                "bHasError" => true,
-                "sResultMessage" => __("task1.file_size_exceed")
+                "sResultMessage" => __($sErrorMessage)
             ]
         );
     }

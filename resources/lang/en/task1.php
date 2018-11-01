@@ -9,7 +9,7 @@ return [
     "form_button" => "Загрузить и обработать",
 
     "process_results" => "Результат обработки",
-    "upload_error" => "Файл не был корректно загружен.",
+    "invalid_file" => "Файл не был корректно загружен.",
     "file_size_exceed" => "Файл слишком большой.",
     "file_processed" => "Файл успешно обработан.",
     "file_saved_as" => "Файл был сохранён как storage/app/images/:filename.jpg.",

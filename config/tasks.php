@@ -23,4 +23,15 @@ return [
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ],
 
+    /**
+     * Почта отправителя при отправке уведомлений о новых заявках.
+     */
+
+    'mail_from' => env("MAIL_USERNAME") . "@yandex.ru",
+
+    /**
+     * Почта для направления уведомлений.
+     */
+    'mail_to' => env("MAIL_TO"),
+
 ];

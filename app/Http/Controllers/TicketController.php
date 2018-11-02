@@ -3,24 +3,32 @@
 namespace App\Http\Controllers;
 
 use App\Ticket;
+use App\Mail\Notification;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Mail;
 
 class TicketController extends Controller
 {
     /**
-     * Store a newly created resource in storage.
+     * Сохранить заявку в БД и направить уведомление на электронную почту.
      *
-     * @param  \Illuminate\Http\Request  $obRequest
-     * @return \Illuminate\Http\Response
+     * @param  Request  $obRequest Данные поступившего запроса.
+     * @return Response
      */
     public function store(Request $obRequest)
     {
+        if (!request("name") || !request("email")) {
+            return $this->uploadError("task2.required_data_missing");
+        }
+
         $obFile = $obRequest->file("file");
 
+        // Если в заявке присутствует файл, выполняем необходимые проверки
+        // и сохраняем его на сервере, а в БД записываем ссылку на него.
         if ($obFile) {
             if(!$obFile->isValid()) {
                 return $this->uploadError("task2.invalid_file");
@@ -45,7 +53,14 @@ class TicketController extends Controller
             $obTicket->save();
         }
 
-        dd($obTicket);
+        $this->sendNotification($obTicket);
+
+        return view("results")->with(
+            [
+                "bHasError" => false,
+                "sResultMessage" => __("task2.ticket_created")
+            ]
+        );
     }
 
     /**
@@ -73,9 +88,21 @@ class TicketController extends Controller
         $sPath = "documents/". date("Y-m-d-H-i-s");
         $sFileName = $obFile->getClientOriginalName();
 
+        // Каждый файл сохраняется под оригинальным именем в отдельной папке.
         File::makeDirectory(storage_path("app/$sPath"));
         Storage::disk("local")->put("$sPath/$sFileName", $obFile->get());
 
         return "$sPath/$sFileName";
+    }
+
+    /**
+     * Отправить уведомление о поступившей заявке.
+     * @param  Ticket $obTicket Заявка.
+     * @return void
+     */
+    private function sendNotification(Ticket $obTicket)
+    {
+        $obMail = new Notification($obTicket);
+        Mail::to(config("tasks.mail_to"))->send($obMail);
     }
 }
